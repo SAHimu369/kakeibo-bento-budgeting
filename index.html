@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kakeibo Bento Glass — Offline Edition</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        /* Pre-paint theme restore — prevents dark→light flash on reload */
+        (function () {
+            try {
+                var saved = localStorage.getItem('kakeibo_offline_state');
+                if (saved) {
+                    var s = JSON.parse(saved);
+                    if (s && s.theme === 'light') {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+</head>
+<body>
+
+    <!-- Ambient Glow Orbs -->
+    <div class="orb orb-amber"></div>
+    <div class="orb orb-crimson"></div>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header class="glass-card">
+            <div class="brand">
+                <div class="logo-box">家</div>
+                <div>
+                    <div class="brand-title">
+                        <span>KAKEIBO</span>
+                        <span class="badge">Offline Bento</span>
+                    </div>
+                    <p class="brand-subtitle">Mindful Household Budgeting</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button onclick="toggleEditLayout()" id="btn-edit-layout" class="btn" title="Toggle Layout Customization">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4Z"/></svg>
+                    <span id="txt-edit-layout">Edit Layout</span>
+                </button>
+                <button onclick="openTutorialModal(0)" class="btn btn-icon" title="Tutorial" aria-label="Tutorial">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </button>
+                <button onclick="openBudgetModal()" class="btn">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                    <span>Budget Setup</span>
+                </button>
+                <button onclick="openAddModal()" class="btn btn-primary">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    <span>Log Expense</span>
+                </button>
+                <button onclick="openCurrencyModal()" class="btn btn-icon" title="Change Currency Symbol" aria-label="Change currency">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5a2.5 2.5 0 0 0-2.5-2.5h-1a2.5 2.5 0 0 0 0 5h2a2.5 2.5 0 0 1 0 5h-1a2.5 2.5 0 0 1-2.5-2.5M12 5v2M12 17v2"/></svg>
+                </button>
+                <button onclick="openBgModal()" class="btn btn-icon" title="Background Image" aria-label="Change background">
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </button>
+                <button onclick="toggleTheme()" id="btn-theme" class="btn btn-icon" title="Toggle Theme" aria-label="Toggle theme">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- BENTO GRID -->
+        <main class="bento-grid" id="main-bento-grid">
+
+            <!-- SAFE DAILY ALLOWANCE -->
+            <section class="glass-card col-span-2" id="card-hero" data-card-id="hero">
+                <div>
+                    <div class="row-between">
+                        <span class="kpi-title">
+                            <svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            Safe Daily Spending Allowance
+                        </span>
+                        <span id="badge-days-left" class="tag tag-neutral">-- Days Left</span>
+                    </div>
+                    <div id="kpi-daily-allowance" class="kpi-value">$0.00</div>
+                    <p id="kpi-daily-subtitle" class="kpi-sub">Monthly Variable Pool: $0.00 ($0.00 spent)</p>
+                </div>
+
+                <div class="mt-lg">
+                    <div class="row-between-sm">
+                        <span class="text-secondary-strong">Variable Capacity Spent</span>
+                        <span id="kpi-pool-percent" class="text-amber-strong">0%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="kpi-pool-bar" class="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="card-resize-handle" title="Drag horizontally to resize columns">⤢</div>
+            </section>
+
+            <!-- BASELINE -->
+            <section class="glass-card" id="card-baseline" data-card-id="baseline">
+                <span class="kpi-title text-secondary-title">Monthly Baseline</span>
+                <div class="mt-md">
+                    <p class="kpi-label">Income</p>
+                    <p id="kpi-income" class="kpi-inline">$0.00</p>
+                    <p class="kpi-label mt-sm">Fixed Costs</p>
+                    <p id="kpi-fixed-costs" class="kpi-inline text-crimson">-$0.00</p>
+                </div>
+                <button onclick="openBudgetModal()" class="link-btn">Edit Baseline &rarr;</button>
+                <div class="card-resize-handle" title="Drag horizontally to resize columns">⤢</div>
+            </section>
+
+            <!-- SAVINGS TARGET -->
+            <section class="glass-card" id="card-savings" data-card-id="savings">
+                <span class="kpi-title text-emerald">Savings Target</span>
+                <div class="mt-md">
+                    <p class="kpi-label">Set Aside First</p>
+                    <p id="kpi-savings" class="kpi-value-sm text-emerald">$0.00</p>
+                    <p id="kpi-savings-status" class="kpi-status text-emerald">0% of Income Allocated</p>
+                </div>
+                <p class="hint">Pay yourself first before daily spending.</p>
+                <div class="card-resize-handle" title="Drag horizontally to resize columns">⤢</div>
+            </section>
+
+            <!-- PILLAR CHART -->
+            <section class="glass-card col-span-2" id="card-chart" data-card-id="chart">
+                <div class="row-between">
+                    <span class="kpi-title text-primary-title">Pillar Distribution</span>
+                    <span id="chart-total-text" class="tag tag-neutral">Total: $0.00</span>
+                </div>
+
+                <div class="chart-container">
+                    <svg class="svg-chart" viewBox="0 0 100 100" role="img" aria-label="Pillar distribution chart">
+                        <circle id="c-needs"   class="chart-segment" cx="50" cy="50" r="30" stroke="var(--color-emerald)" stroke-dasharray="0 188.4" stroke-dashoffset="0" />
+                        <circle id="c-wants"   class="chart-segment" cx="50" cy="50" r="30" stroke="var(--color-amber)"   stroke-dasharray="0 188.4" stroke-dashoffset="0" />
+                        <circle id="c-culture" class="chart-segment" cx="50" cy="50" r="30" stroke="var(--color-sapphire)" stroke-dasharray="0 188.4" stroke-dashoffset="0" />
+                        <circle id="c-extra"   class="chart-segment" cx="50" cy="50" r="30" stroke="var(--color-crimson)"  stroke-dasharray="0 188.4" stroke-dashoffset="0" />
+                    </svg>
+                </div>
+
+                <div class="chart-legend">
+                    <div class="text-emerald">Needs</div>
+                    <div class="text-amber">Wants</div>
+                    <div class="text-sapphire">Culture</div>
+                    <div class="text-crimson">Extra</div>
+                </div>
+                <div class="card-resize-handle" title="Drag horizontally to resize columns">⤢</div>
+            </section>
+
+            <!-- CATEGORY AGGREGATES -->
+            <section class="glass-card col-span-2" id="card-pillars" data-card-id="pillars">
+                <span class="kpi-title text-primary-title mb-md">4 Kakeibo Pillars</span>
+                <div class="pillar-list">
+                    <div class="pillar-row"><span class="tag tag-needs">Needs</span><span id="bar-amt-needs" class="pillar-amt">$0.00</span></div>
+                    <div class="pillar-row"><span class="tag tag-wants">Wants</span><span id="bar-amt-wants" class="pillar-amt">$0.00</span></div>
+                    <div class="pillar-row"><span class="tag tag-culture">Culture</span><span id="bar-amt-culture" class="pillar-amt">$0.00</span></div>
+                    <div class="pillar-row"><span class="tag tag-extra">Extra</span><span id="bar-amt-extra" class="pillar-amt">$0.00</span></div>
+                </div>
+                <div class="card-resize-handle" title="Drag horizontally to resize columns">⤢</div>
+            </section>
+
+            <!-- TRANSACTIONS LEDGER -->
+            <section class="glass-card col-span-3" id="card-ledger" data-card-id="ledger">
+                <div class="row-between">
+                    <span class="kpi-title text-primary-title">Daily Ledger</span>
+                    <button onclick="resetSampleData()" class="link-btn-sm">Reset Sample Data</button>
+                </div>
+                <div id="transaction-list" class="transaction-list"></div>
+                <div class="card-resize-handle" title="Drag horizontally to resize columns">⤢</div>
+            </section>
+
+            <!-- REFLECTION JOURNAL -->
+            <section class="glass-card" id="card-reflection" data-card-id="reflection">
+                <div>
+                    <span class="kpi-title text-crimson mb-md">Reflect (改善)</span>
+                    <div class="journal-summary">
+                        <div><strong>Available:</strong> <span id="journal-q1">$0.00</span></div>
+                        <div><strong>Savings:</strong> <span id="journal-q2">$0.00</span></div>
+                        <div><strong>Spent:</strong> <span id="journal-q3">$0.00</span></div>
+                    </div>
+                    <label for="reflection-note" class="kpi-label">4. How can you improve next month?</label>
+                    <textarea id="reflection-note" rows="3" class="form-control" placeholder="Write your monthly mindfulness note..."></textarea>
+                </div>
+                <div class="card-resize-handle" title="Drag horizontally to resize columns">⤢</div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: ADD EXPENSE -->
+    <div id="modal-add" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-add-title">
+        <div class="glass-card modal-box">
+            <h3 id="modal-add-title" class="modal-title">Log Daily Expense</h3>
+            <form onsubmit="handleAddTransaction(event)">
+                <div class="form-group">
+                    <label for="input-title">Item Description</label>
+                    <input type="text" id="input-title" required class="form-control" placeholder="e.g. Fresh Groceries">
+                </div>
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label for="input-amount">Amount (<span class="currency-label">$</span>)</label>
+                        <input type="number" id="input-amount" step="0.01" required class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-date">Date</label>
+                        <input type="date" id="input-date" required class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="input-category">Kakeibo Pillar</label>
+                    <select id="input-category" class="form-control">
+                        <option value="needs">Needs (Essential Care, Food, Rent)</option>
+                        <option value="wants">Wants (Dining out, Hobbies, Treats)</option>
+                        <option value="culture">Culture (Books, Courses, Museums)</option>
+                        <option value="extra">Extra (Unplanned & Emergency)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="input-note">Mindfulness Note (Optional)</label>
+                    <input type="text" id="input-note" class="form-control" placeholder="Why was this purchase made?">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeAddModal()" class="btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIGURATION -->
+    <div id="modal-budget" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-budget-title">
+        <div class="glass-card modal-box">
+            <h3 id="modal-budget-title" class="modal-title">Configure Monthly Baseline</h3>
+            <form onsubmit="handleSaveBudget(event)">
+                <div class="form-group">
+                    <label for="cfg-income">Total Income (<span class="currency-label">$</span>)</label>
+                    <input type="number" id="cfg-income" step="0.01" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="cfg-fixed">Fixed Overhead Bills (<span class="currency-label">$</span>)</label>
+                    <input type="number" id="cfg-fixed" step="0.01" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="cfg-savings">Target Savings (<span class="currency-label">$</span>)</label>
+                    <input type="number" id="cfg-savings" step="0.01" required class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeBudgetModal()" class="btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Config</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: TUTORIAL -->
+    <div id="modal-tutorial" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+        <div class="glass-card modal-box modal-box-tutorial">
+            <button type="button" class="modal-close" onclick="closeTutorialModal()" aria-label="Close tutorial">&times;</button>
+            <div id="tutorial-content" class="tutorial-content"></div>
+            <div class="tutorial-nav">
+                <button id="tut-prev-btn" onclick="prevTutorialStep()" class="btn">Back</button>
+                <button id="tut-next-btn" onclick="nextTutorialStep()" class="btn btn-primary">Next &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CURRENCY -->
+    <div id="modal-currency" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-currency-title">
+        <div class="glass-card modal-box">
+            <h3 id="modal-currency-title" class="modal-title">Choose Currency Symbol</h3>
+
+            <div class="currency-preview-box">
+                <div class="currency-preview-label">Preview</div>
+                <div class="amount" id="currency-preview-amount">$1,234.56</div>
+            </div>
+
+            <div class="currency-grid">
+                <button type="button" onclick="applyCurrency('$')">$</button>
+                <button type="button" onclick="applyCurrency('€')">€</button>
+                <button type="button" onclick="applyCurrency('£')">£</button>
+                <button type="button" onclick="applyCurrency('¥')">¥</button>
+                <button type="button" onclick="applyCurrency('₹')">₹</button>
+                <button type="button" onclick="applyCurrency('₩')">₩</button>
+                <button type="button" onclick="applyCurrency('₽')">₽</button>
+                <button type="button" onclick="applyCurrency('₺')">₺</button>
+                <button type="button" onclick="applyCurrency('₪')">₪</button>
+                <button type="button" onclick="applyCurrency('R$')">R$</button>
+                <button type="button" onclick="applyCurrency('A$')">A$</button>
+                <button type="button" onclick="applyCurrency('C$')">C$</button>
+                <button type="button" onclick="applyCurrency('CHF')">CHF</button>
+                <button type="button" onclick="applyCurrency('kr')">kr</button>
+                <button type="button" onclick="applyCurrency('zł')">zł</button>
+                <button type="button" onclick="applyCurrency('₿')">₿</button>
+            </div>
+
+            <div class="form-group">
+                <label for="input-currency-custom">Or custom symbol / code (max 5 chars)</label>
+                <input type="text" id="input-currency-custom" class="form-control" maxlength="5" placeholder="e.g. USD, kr, 円">
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" onclick="closeCurrencyModal()" class="btn">Cancel</button>
+                <button type="button" onclick="applyCustomCurrency()" class="btn btn-primary">Apply Custom</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: BACKGROUND IMAGE -->
+    <div id="modal-bg" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-bg-title">
+        <div class="glass-card modal-box">
+            <h3 id="modal-bg-title" class="modal-title">Background Image</h3>
+
+            <label class="kpi-label">Current</label>
+            <div class="bg-preview" id="bg-preview">Preview</div>
+
+            <div class="form-group">
+                <label for="input-bg-url">Image URL</label>
+                <input type="text" id="input-bg-url" class="form-control" placeholder="https://example.com/photo.jpg">
+            </div>
+
+            <div class="or-divider">— or —</div>
+
+            <div class="form-group">
+                <label for="input-bg-file">Upload from device</label>
+                <input type="file" id="input-bg-file" accept="image/*" class="form-control" onchange="handleBgFile(event)">
+                <p class="hint">Images are auto-compressed to 1600px / JPEG and stored locally in your browser.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" onclick="resetBg()" class="btn">Reset to Default</button>
+                <button type="button" onclick="closeBgModal()" class="btn">Cancel</button>
+                <button type="button" onclick="applyBgUrl()" class="btn btn-primary">Apply URL</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
