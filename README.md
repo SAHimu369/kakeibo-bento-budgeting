@@ -77,11 +77,11 @@ Everything lives in your browser's `localStorage`. No accounts, no servers, no a
 
 | Dark theme | Light theme |
 |---|---|
-| ![dark](docs/screenshot-dark.png) | ![light](docs/screenshot-light.png) |
+| ![dark](Screenshot/screenshot-dark.png) | ![light](Screenshot/screenshot-light.png) |
 
 | Currency modal | Background modal |
 |---|---|
-| ![currency](docs/screenshot-currency.png) | ![background](docs/screenshot-bg.png) |
+| ![currency](Screenshot/screenshot-currency-dark.png)(Screenshot/screenshot-currency-light.png) | ![background] (Screenshot/screenshot-bg-dark.png) (Screenshot/screenshot-bg-light.png) |
 
 ---
 
