@@ -81,7 +81,7 @@ Everything lives in your browser's `localStorage`. No accounts, no servers, no a
 
 | Currency modal | Background modal |
 |---|---|
-| ![currency](Screenshot/screenshot-currency-dark.png)(Screenshot/screenshot-currency-light.png) | ![background] (Screenshot/screenshot-bg-dark.png) (Screenshot/screenshot-bg-light.png) |
+| ![currency](Screenshot/screenshot-currency-dark.png) ![currency](Screenshot/screenshot-currency-light.png) | ![background](Screenshot/screenshot-bg-dark.png) ![background](Screenshot/screenshot-bg-light.png) |
 
 ---
 
@@ -89,14 +89,14 @@ Everything lives in your browser's `localStorage`. No accounts, no servers, no a
 
 ### Option 1 — Use it right now
 
-Open the [live demo](https://your-username.github.io/kakeibo-bento/) in your browser. Done.
+Open the [live demo](https://sahimu369.github.io/kakeibo-bento/) in your browser. Done.
 
 ### Option 2 — Run it locally
 
 Because the app uses no server-side code and no ES modules, you can just open `index.html`:
 
 ```bash
-git clone https://github.com/your-username/kakeibo-bento.git
+git clone https://github.com/sahimu369/kakeibo-bento.git
 cd kakeibo-bento
 open index.html          # macOS
 # or
