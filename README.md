@@ -3,7 +3,7 @@
 > A mindful household budget tracker inspired by the Japanese **Kakeibo** (家計簿) method — beautifully packaged in a frosted-glass bento layout, and completely offline.
 
 <p align="center">
-  <a href="https://your-username.github.io/kakeibo-bento/"><strong>🚀 Live Demo</strong></a> ·
+  <a href="https://sahimu369.github.io/kakeibo-bento-budgeting/"><strong>🚀 Live Demo</strong></a> ·
   <a href="#-features"><strong>Features</strong></a> ·
   <a href="#-getting-started"><strong>Getting Started</strong></a> ·
   <a href="#-how-it-works"><strong>How It Works</strong></a>
@@ -89,7 +89,7 @@ Everything lives in your browser's `localStorage`. No accounts, no servers, no a
 
 ### Option 1 — Use it right now
 
-Open the [live demo](https://sahimu369.github.io/kakeibo-bento/) in your browser. Done.
+Open the [live demo](https://sahimu369.github.io/kakeibo-bento-budgeting/) in your browser. Done.
 
 ### Option 2 — Run it locally
 
